@@ -20,10 +20,14 @@
 
     packages = forEachSystem (system: pkgs: 
       {
-        default = pkgs.callPackage ./testbed.nix {
-          nixosConfig = self.nixosConfigurations.default;
-        };
+        default = self.lib.mkTestbed pkgs self.nixosConfigurations.default;
       }
     );
+
+    lib = {
+      mkTestbed = pkgs: nixosConfig: pkgs.callPackage ./testbed.nix {
+        inherit nixosConfig;
+      };
+    };
   };
 }
