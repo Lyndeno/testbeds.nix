@@ -20,7 +20,15 @@
 
     packages = forEachSystem (system: pkgs: 
       {
-        default = pkgs.writeShellApplication {
+        default = let
+          host = self.nixosConfigurations.default.extendModules {
+            modules = [
+              ({lib, ...}: {
+                nixpkgs.hostPlatform = lib.mkForce system;
+              })
+            ];
+          };
+        in  pkgs.writeShellApplication{
           name = "default";
           text = ''
             cleanup() {
@@ -33,7 +41,7 @@
             trap cleanup EXIT
 
             NIX_DISK_IMAGE="$directory/nixos.qcow2" \
-              ${pkgs.lib.getExe self.nixosConfigurations.default.config.system.build.vm}
+              ${pkgs.lib.getExe host.config.system.build.vm}
           '';
         };
       }
